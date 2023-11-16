@@ -1,0 +1,187 @@
+---
+title: "hw-04-abhishekdeore"
+author: "Abhishek Deore"
+format: html
+editor: visual
+---
+
+## Regression in Python
+
+Regression in Python refers to the process of fitting a mathematical model to a dataset to understand the relationship between the independent variable(s) and the dependent variable. One commonly used library for regression analysis is scikit-learn, which provides a wide range of regression algorithms.
+
+For example, linear regression is a fundamental technique where the goal is to find the best-fitting line through the data points.
+
+```{python}
+
+#importing important libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+#reading the dataset
+df = pd.read_csv("tornados.csv")
+
+#check the shape of the data-set
+df.shape
+
+#drop the na values
+df.dropna()
+
+#dropping the 0 valuesfrom the dataset
+
+df = df.replace(0, np.nan)  # Replace 0 with NaN
+df = df.dropna(axis=0, how='any')# Drop rows with NaN values
+
+```
+
+### Plotting the data
+
+```{python}
+# Creating a scatter plot for the relationship between "slat" and "elat"
+plt.figure()
+plt.scatter(df["slat"], df["elat"], color="black", s=11)
+plt.title("Plot for the slat V/s elat")
+plt.xlabel("slat")
+plt.ylabel("elat")
+plt.tight_layout()
+plt.grid(axis="both", color="darkgrey")
+plt.show()
+
+```
+
+This scatter plot depicts the correlation between the dataset's attributes. It visually confirms a linear association between the "`slat`" and "`elat`" attributes, suggesting their suitability for regression model fitting.
+
+### Multiple Linear Regression
+
+Multiple Linear Regression is an extension of simple linear regression, allowing for the analysis of relationships between a dependent variable and two or more independent variables. It assumes a linear relationship and aims to model the impact of multiple predictors on the target variable. The model incorporates coefficients for each predictor, indicating their individual effect while considering interactions.
+
+Key evaluation metrics include the coefficient of determination (R-squared) and significance tests for coefficients. Multiple Linear Regression is widely employed in various fields for predictive modeling, provided assumptions such as linearity, independence, and homoscedasticity are met.
+
+The process involves several stages with the input dataset: 1. The data is partitioned into distinct training and test sets. 2. Multiple linear regression is employed to train the model using the training data. 3. The established model is then utilized to predict outcomes on the test data. 4. The model's performance is assessed through various evaluation metrics. 5. Postprocessing steps involve visualizing the fitted model.
+
+#### Step 1: Split Input Data into Training and Test Sets
+
+```{python}
+
+# Get the total number of instances in the dataset
+numInstances = len(df)
+
+# Define the number of instances for training
+numTrain = 20   # number of training instances
+
+# Calculate the number of instances for testing
+numTest = numInstances - numTrain
+
+# Extract the feature (slat) and target variable (elat) from the DataFrame
+X = df["slat"]
+y = df["elat"]
+
+# Split the data into training and test sets
+X_train = X[:-numTest]  # Use the first numTrain instances for training
+X_test = X[-numTest:]   # Use the remaining instances for testing
+y_train = y[:-numTest]  # Corresponding target variable for the training set
+y_test = y[-numTest:]   # Corresponding target variable for the test set
+
+```
+
+#### Step 2: Fit Regression Model to Training Set
+
+```{python}
+from sklearn import linear_model
+from sklearn.metrics import mean_squared_error, r2_score
+
+# Created a linear regression object
+regr = linear_model.LinearRegression()
+
+# Reshaped the input features
+X_train_reshaped = X_train.values.reshape(-1, 1)
+
+# Fitted regression model to the training set
+regr.fit(X_train_reshaped, y_train)
+
+```
+
+#### Step 3: Apply Model to the Test Set
+
+```{python}
+
+# Reshapeing the test set if needed
+X_test_reshaped = X_test.values.reshape(-1, 1)
+
+# Applying model to the test set
+y_pred_test = regr.predict(X_test_reshaped)
+
+```
+
+#### Step 4: Evaluate Model Performance on Test Set
+
+```{python}
+# Create a new figure for the scatter plot
+plt.figure()
+
+# Scatter plot comparing true and predicted values
+plt.scatter(y_test, y_pred_test, color='black', s=10)
+
+# Set the title of the plot
+plt.title('Comparing true and predicted values for test set')
+
+# Label for the x-axis
+plt.xlabel('True values for y')
+
+# Label for the y-axis
+plt.ylabel('Predicted values for y')
+
+plt.grid(axis = "both")
+
+# Display the plot
+plt.show()
+
+
+```
+
+This scatter plot illustrates the comparison between true and predicted values for the test set. The x-axis represents the true values for y, while the y-axis represents the corresponding predicted values. The black dots depict the relationship between actual and model-predicted values, providing a visual assessment of the model's performance on the test set.
+
+```{python}
+# Model evaluation
+
+# Display the root mean squared error for the test set predictions
+print("Root mean squared error = %.4f" % np.sqrt(mean_squared_error(y_test, y_pred_test)))
+```
+
+```{python}
+# Display the R-squared value for the test set predictions
+print('R-squared = %.4f' % r2_score(y_test, y_pred_test))
+```
+
+#### Step 5: Postprocessing
+
+```{python}
+# Display model parameters
+# Print the slope (coefficients) of the linear regression model
+print('Slope = ', regr.coef_[0])
+
+```
+
+```{python}
+# Display model parameters
+# Print the intercept (bias term) of the linear regression model
+print('Intercept = ', regr.intercept_)
+```
+
+Plotting the Output
+
+```{python}
+
+# Plot outputs
+plt.figure()
+plt.scatter(X_test, y_test,  color='black', s=10)
+plt.plot(X_test, y_pred_test, color='blue', linewidth=1)
+titlestr = 'Predicted Function: y = %.2fX + %.2f' % (regr.coef_[0], regr.intercept_)
+plt.title(titlestr)
+plt.xlabel('X')
+plt.ylabel('y')
+plt.grid(axis = "both")
+plt.show()
+```
+
+The figure shows a scatter plot of the predicted function, which is a blue line that passes through the black data points. The title of the plot is "Predicted Function: `y = 0.97X + 1.62`, which indicates that the function is a linear regression model with a slope of 0.97 and a y-intercept of 1.62. The x-axis is labeled "X" which represents the `X_test` and the y-axis is labeled "y" which represents `y_test` values.
